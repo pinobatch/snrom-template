@@ -1,4 +1,5 @@
 .include "nes.inc"
+.include "mmc1.inc"
 .include "global.inc"
 
 .segment "CODE"
@@ -38,6 +39,7 @@ vwait1:
   cld
 
   ; Clear OAM and the zero page here.
+  ; We don't copy the cleared OAM to the PPU until later.
   ldx #0
   jsr ppu_clear_oam  ; clear out OAM from X to end and set X to 0
 
@@ -59,8 +61,13 @@ clear_zp:
   ; Other things that can be done here (not shown):
   ; Set up PRG RAM
   ; Copy initial high scores, bankswitching trampolines, etc. to RAM
-  ; Set up initial CHR banks
   ; Set up your sound engine
+  
+  lda #%01110
+  ;        ^^ Vertical mirroring (horizontal arrangement of nametables)
+  ;      ^^   Fixed $C000
+  ;     ^     8 KiB bank switching
+  jsr setMMC1BankMode
 
 vwait2:
   bit PPUSTATUS  ; After the second vblank, we know the PPU has
@@ -73,5 +80,9 @@ vwait2:
   ; afterward, you want to use the NMI method because if you read
   ; PPUSTATUS at the exact moment that the bit turns on, it'll flip
   ; from off to on to off faster than the CPU can see.
+
+  lda #4
+  jsr setPRGBank
   jmp main
 .endproc
+

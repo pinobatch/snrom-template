@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 #
 # Makefile for NES game
-# Copyright 2011-2014 Damian Yerrick
+# Copyright 2011-2015 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
 # modification, are permitted in any medium without royalty
@@ -10,15 +10,17 @@
 #
 
 # These are used in the title of the NES program and the zip file.
-title = nrom-template
+title = snrom-template
+titlealt = uorom-template
 version = 0.05
 
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
-objlist = nrom init main bg player \
-pads ppuclear
-
+objlist = main init bg player \
+pads ppuclear mmc1 chrram bankcalltable
+objlistalt = main init bg player \
+pads ppuclear unrom chrram bankcalltable
 
 AS65 = ca65
 LD65 = ld65
@@ -50,9 +52,12 @@ else
 DOTEXE=
 endif
 
-.PHONY: run dist zip clean
+.PHONY: run runalt dist zip clean
 
 run: $(title).nes
+	$(EMU) $<
+
+runalt: $(titlealt).nes
 	$(EMU) $<
 
 # Rule to create or update the distribution zipfile by adding all
@@ -64,7 +69,7 @@ run: $(title).nes
 # makefile changes.
 dist: zip
 zip: $(title)-$(version).zip
-$(title)-$(version).zip: zip.in $(title).nes README.md CHANGES.txt $(objdir)/index.txt
+$(title)-$(version).zip: zip.in $(title).nes $(titlealt).nes README.md CHANGES.txt $(objdir)/index.txt
 	zip -9 -u $@ -@ < $<
 
 # Build zip.in from the list of files in the Git tree
@@ -80,19 +85,23 @@ clean:
 
 # Rules for PRG ROM
 
-objlistntsc = $(foreach o,$(objlist),$(objdir)/$(o).o)
+objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
+objlistalto = $(foreach o,$(objlistalt),$(objdir)/$(o).o)
 
-map.txt $(title).nes: nrom128.cfg $(objlistntsc)
+map.txt $(title).nes: snrom2mbit.cfg $(objlisto)
 	$(LD65) -o $(title).nes -m map.txt -C $^
 
-$(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
+mapalt.txt $(titlealt).nes: uorom2mbit.cfg $(objlistalto)
+	$(LD65) -o $(titlealt).nes -m mapalt.txt -C $^
+
+$(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc $(srcdir)/mmc1.inc
 	$(AS65) $(CFLAGS65) $< -o $@
 
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) $< -o $@
 
 # Files that depend on .incbin'd files
-$(objdir)/main.o: $(objdir)/bggfx.chr $(objdir)/spritegfx.chr
+$(objdir)/chrram.o: $(objdir)/bggfx.chr $(objdir)/spritegfx.chr
 
 # This is an example of how to call a lookup table generator at
 # build time.  mktables.py itself is not included because the demo
@@ -102,9 +111,6 @@ $(objdir)/ntscPeriods.s: tools/mktables.py
 	$< period $@
 
 # Rules for CHR ROM
-
-$(title).chr: $(objdir)/bggfx.chr $(objdir)/spritegfx.chr
-	cat $^ > $@
 
 $(objdir)/%.chr: $(imgdir)/%.png
 	tools/pilbmp2nes.py $< $@

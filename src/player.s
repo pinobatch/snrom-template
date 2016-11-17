@@ -1,4 +1,5 @@
 .include "nes.inc"
+.include "mmc1.inc"
 .include "global.inc"
 
 .segment "ZEROPAGE"
@@ -190,12 +191,15 @@ doneWallCollision:
 .endproc
 
 
+; We put this in bank 2 to test the bankcall mechanism
+.segment "BANK02"
+.export draw_player_sprite_far
 ;;
 ; Draws the player's character to the display list as six sprites.
 ; In the template, we don't need to handle half-offscreen actors,
 ; but a scrolling game will need to "clip" sprites (skip drawing the
 ; parts that are offscreen).
-.proc draw_player_sprite
+.proc draw_player_sprite_far
 draw_y = 0
 cur_tile = 1
 x_add = 2         ; +8 when not flipped; -8 when flipped
@@ -307,6 +311,6 @@ tileloop:
   bne rowloop
 
   stx oam_used
-  rts
+  jmp bankrts
 .endproc
 

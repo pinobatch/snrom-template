@@ -1,6 +1,6 @@
 ;
 ; Simple sprite demo for NES
-; Copyright 2011-2014 Damian Yerrick
+; Copyright 2011 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided
@@ -9,6 +9,7 @@
 ;
 
 .include "nes.inc"
+.include "mmc1.inc"
 .include "global.inc"
 
 OAM = $0200
@@ -44,6 +45,8 @@ new_keys:      .res 2
   rti
 .endproc
 
+.segment "BANK04"
+
 .proc main
 
   ; Now the PPU has stabilized, and we're still in vblank.  Copy the
@@ -52,7 +55,11 @@ new_keys:      .res 2
   jsr load_main_palette
 
   ; While in forced blank we have full access to VRAM.
-  ; Load the nametable (background map).
+  ; Copy CHR data to CHR RAM.
+  ldx #load_chr_ram
+  jsr bankcall
+
+  ; Then load the nametable (background map).
   jsr draw_bg
   
   ; Set up game variables, as if it were the start of a new level.
@@ -71,7 +78,8 @@ forever:
   ldx #4
   stx oam_used
   ; adds to oam_used
-  jsr draw_player_sprite
+  ldx #draw_player_sprite
+  jsr bankcall
   ldx oam_used
   jsr ppu_clear_oam
 
@@ -114,13 +122,9 @@ copypalloop:
   bcc copypalloop
   rts
 .endproc
-
 .segment "RODATA"
 initial_palette:
   .byt $22,$18,$28,$38,$0F,$06,$16,$26,$0F,$08,$19,$2A,$0F,$02,$12,$22
   .byt $22,$08,$16,$37,$0F,$06,$16,$26,$0F,$0A,$1A,$2A,$0F,$02,$12,$22
 
-; Include the CHR ROM data
-.segment "CHR"
-  .incbin "obj/nes/bggfx.chr"
-  .incbin "obj/nes/spritegfx.chr"
+

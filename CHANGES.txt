@@ -1,6 +1,7 @@
-Git 2016-11-15
-* NROM version now on GitHub
+Git 2016-11-16
+* SNROM and UOROM versions now on GitHub
 * Update pilbmp2nes.py and installation instructions to Python 3
+* Remove build instructions that duplicate those of nrom-template
 
 0.05 (2015-02-13): The "Ho-ly-$#!+" Code Review
 * renamed .h files to .inc so as not to confuse with C headers
@@ -17,8 +18,6 @@ Git 2016-11-15
 * corrected character's head position
 * corrected negative byte values for ca65 2.14
 * moved -o to front of linker command line for ld65 2.14
-* switched CHR ROM inclusion to .incbin instead of cat
-* other things listed at http://forums.nesdev.com/viewtopic.php?f=22&t=7991
 
 0.02 (2011-07-23)
 * added comment about the holy war over clearing or not clearing RAM
