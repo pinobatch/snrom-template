@@ -31,7 +31,8 @@ imgdir = tilesets
 
 #EMU := "/C/Program Files/Nintendulator/Nintendulator.exe"
 EMU := fceux
-# other options for EMU are start (Windows) or gnome-open (GNOME)
+DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
+# other options for EMU are start (Windows) or xdg--open (Linux)
 
 # Occasionally, you need to make "build tools", or programs that run
 # on a PC that convert, compress, or otherwise translate PC data
@@ -45,20 +46,24 @@ CFLAGS = -std=gnu99 -Wall -DNDEBUG -O
 
 # Windows needs .exe suffixed to the names of executables; UNIX does
 # not.  COMSPEC will be set to the name of the shell on Windows and
-# not defined on UNIX.
+# not defined on UNIX.  Also the Windows Python installer puts
+# py.exe in the path, but not python3.exe, which confuses MSYS Make.
 ifdef COMSPEC
-DOTEXE=.exe
+DOTEXE:=.exe
+PY:=py
 else
-DOTEXE=
+DOTEXE:=
+PY:=python3
 endif
 
-.PHONY: run runalt dist zip clean
+# Pseudo-targets
+.PHONY: run runalt debug debugalt dist zip clean
 
 run: $(title).nes
 	$(EMU) $<
-
 runalt: $(titlealt).nes
 	$(EMU) $<
+all: $(title).nes $(titlealt).nes
 
 # Rule to create or update the distribution zipfile by adding all
 # files listed in zip.in.  Actually the zipfile depends on every
@@ -110,12 +115,12 @@ $(objdir)/chrram.o: $(objdir)/bggfx.chr $(objdir)/spritegfx.chr
 $(objdir)/ntscPeriods.s: tools/mktables.py
 	$< period $@
 
-# Rules for CHR ROM
+# Rules for CHR RAM
 
 $(objdir)/%.chr: $(imgdir)/%.png
-	tools/pilbmp2nes.py $< $@
+	$(PY) tools/pilbmp2nes.py $< $@
 
 $(objdir)/%16.chr: $(imgdir)/%.png
-	tools/pilbmp2nes.py -H 16 $< $@
+	$(PY) tools/pilbmp2nes.py -H 16 $< $@
 
 
