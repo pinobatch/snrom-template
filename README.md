@@ -3,6 +3,8 @@ IF THIS FILE HAS NO LINE BREAKS:  View it in a web browser.
 SNROM template
 ==============
 
+![Screenshot: a figure in a red vest and newsboy cap scooting on his hands and bottom on a ground of grass and dirt between two yellow crates](docs/screenshot.png)
+
 This is a minimal working program for the Nintendo Entertainment
 System using the SGROM, SNROM, UNROM, or UOROM board.  It assumes
 familiarity with [nrom-template].
