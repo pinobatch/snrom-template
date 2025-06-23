@@ -31,8 +31,8 @@ imgdir = tilesets
 
 #EMU := "/C/Program Files/Nintendulator/Nintendulator.exe"
 EMU := fceux
-DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
-# other options for EMU are start (Windows) or xdg--open (Linux)
+DEBUGEMU := Mesen
+# other options for EMU are start "" (Windows) or xdg-open (Linux)
 
 # Occasionally, you need to make "build tools", or programs that run
 # on a PC that convert, compress, or otherwise translate PC data
@@ -81,12 +81,14 @@ $(title)-$(version).zip: zip.in $(title).nes $(titlealt).nes README.md CHANGES.t
 zip.in:
 	git ls-files | grep -e "^[^.]" > $@
 	echo zip.in >> $@
+	echo $(titlealt).nes >> $@
+	echo $(title).nes >> $@
 
 $(objdir)/index.txt: makefile
 	echo Files produced by build tools go here, but caulk goes where? > $@
 
 clean:
-	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr
+	$(RM) $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr
 
 # Rules for PRG ROM
 

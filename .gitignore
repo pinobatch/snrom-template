@@ -5,11 +5,13 @@
 /obj/nes/*.s
 /zip.in
 *.nes.deb
-/map.txt
-/nsfmap.txt
+*.dbg
+*.fdb
+/map*.txt
 __pycache__/
 *.pyc
-nrom-template-*.zip
+*rom-template-*.zip
+*rom-template.nes
 
 # this is NES homebrew, not DSiWare
 *.DS_Store
